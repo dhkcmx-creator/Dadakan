@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Typewriter Lirik - Sesi Potret</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e') no-repeat center center/cover;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .lyrics-box {
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(6px);
+            padding: 24px 36px;
+            border-radius: 12px;
+            color: #ffffff;
+            font-size: 22px;
+            font-weight: 500;
+            min-height: 35px;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            cursor: pointer;
+        }
+
+        #text {
+            border-right: 2px solid white;
+            white-space: nowrap;
+            overflow: hidden;
+            animation: blink 0.7s infinite;
+        }
+
+        @keyframes blink {
+            50% { border-color: transparent; }
+        }
+    </style>
+</head>
+<body>
+
+    <audio id="bg-music" src="lagu.mp3" preload="auto"></audio>
+
+    <div class="lyrics-box" id="box">
+        <span id="text">Klik di sini untuk memutar lagu...</span>
+    </div>
+
+    <script>
+        // Atur detik mulai (time) dan kecepatan ketik (speed) per baris di sini
+        // Makin BESAR angka speed, makin PELAN ngetiknya
+        const lyricsData = [
+            { text: "Ku bertamu ke rumah barumu", time: 157, speed: 150 },
+            { text: "Tak ada kamu", time: 163, speed: 160 },
+            { text: "Hanya papan dan namamu", time: 166, speed: 105 },
+            { text: "Mana ocehan wewangian khasmu?", time: 169, speed: 130 },
+            { text: "Jarak ini terlalu jauh", time: 175, speed: 120 },
+            { text: "Kalau rindu aku tak mampu", time: 178, speed: 120 },
+            { text: "Sesal hatiku tak sempat temani kamu", time: 181, speed: 100 },
+            { text: "Harusnya kubisikkan kata ajaib ke telingamu", time: 187, speed: 110 },
+            { text: "Soal ikhlas ternyata aku masih amatir", time: 193, speed: 120 },
+            { text: "Masih sangat amatir...", time: 199, speed: 160 },
+            { text: "Gengsi menyelimutiku", time: 205, speed: 140 },
+            { text: "Manusia ini kehilanganmu...", time: 208, speed: 170 }
+        ];
+
+        const textElement = document.getElementById('text');
+        const audioElement = document.getElementById('bg-music');
+        const boxElement = document.getElementById('box');
+
+        let isStarted = false;
+        let currentInterval = null;
+
+        audioElement.onerror = () => {
+            textElement.textContent = "Error: File 'lagu.mp3' tidak ditemukan di folder!";
+        };
+
+        function typeWriter(text, customSpeed) {
+            clearInterval(currentInterval);
+            let charIndex = 0;
+            textElement.textContent = "";
+
+            const speed = customSpeed || 130; 
+
+            currentInterval = setInterval(() => {
+                if (charIndex < text.length) {
+                    textElement.textContent += text.charAt(charIndex);
+                    charIndex++;
+                } else {
+                    clearInterval(currentInterval);
+                }
+            }, speed);
+        }
+
+        audioElement.addEventListener('timeupdate', () => {
+            const currentTime = audioElement.currentTime;
+
+            lyricsData.forEach((item) => {
+                if (currentTime >= item.time && !item.typed) {
+                    item.typed = true;
+                    typeWriter(item.text, item.speed);
+                }
+            });
+        });
+
+        boxElement.addEventListener('click', () => {
+            if (!isStarted) {
+                isStarted = true;
+                textElement.textContent = "";
+                audioElement.currentTime = 157;
+                audioElement.play().catch(err => {
+                    textElement.textContent = "Gagal memutar audio: " + err.message;
+                });
+            }
+        });
+    </script>
+</body>
+</html>
